@@ -14,7 +14,145 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      marks: {
+        Row: {
+          created_at: string | null
+          exam_date: string | null
+          exam_type: string
+          id: string
+          marks_obtained: number
+          subject_id: string
+          total_marks: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          exam_date?: string | null
+          exam_type: string
+          id?: string
+          marks_obtained: number
+          subject_id: string
+          total_marks: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          exam_date?: string | null
+          exam_type?: string
+          id?: string
+          marks_obtained?: number
+          subject_id?: string
+          total_marks?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marks_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          class: string
+          created_at: string | null
+          id: string
+          institute_name: string
+          institute_type: string
+          student_name: string
+          updated_at: string | null
+          user_id: string
+          username: string
+        }
+        Insert: {
+          class: string
+          created_at?: string | null
+          id?: string
+          institute_name: string
+          institute_type: string
+          student_name: string
+          updated_at?: string | null
+          user_id: string
+          username: string
+        }
+        Update: {
+          class?: string
+          created_at?: string | null
+          id?: string
+          institute_name?: string
+          institute_type?: string
+          student_name?: string
+          updated_at?: string | null
+          user_id?: string
+          username?: string
+        }
+        Relationships: []
+      }
+      study_sessions: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          id: string
+          started_at: string | null
+          subject_id: string
+          topic: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          started_at?: string | null
+          subject_id: string
+          topic: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          started_at?: string | null
+          subject_id?: string
+          topic?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "study_sessions_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subjects: {
+        Row: {
+          created_at: string | null
+          id: string
+          subject_name: string
+          subject_number: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          subject_name: string
+          subject_number: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          subject_name?: string
+          subject_number?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
