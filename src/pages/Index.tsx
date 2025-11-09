@@ -1,10 +1,12 @@
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Brain, Clock, Target, TrendingUp, Zap, BookOpen, Award, Calendar } from "lucide-react";
 import heroImage from "@/assets/hero-study.jpg";
 
 const Index = () => {
+  const navigate = useNavigate();
   const features = [
     {
       icon: Brain,

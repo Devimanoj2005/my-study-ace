@@ -1,129 +1,160 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
-import { BookOpen, Brain, Clock, TrendingUp, Target, Flame } from "lucide-react";
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
+import { BookOpen, Brain, AlertTriangle, User } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import AIChatBot from "@/components/AIChatBot";
 
 const Dashboard = () => {
-  const weeklyData = [
-    { day: "Mon", minutes: 45, confidence: 75 },
-    { day: "Tue", minutes: 60, confidence: 80 },
-    { day: "Wed", minutes: 30, confidence: 65 },
-    { day: "Thu", minutes: 75, confidence: 85 },
-    { day: "Fri", minutes: 50, confidence: 70 },
-    { day: "Sat", minutes: 90, confidence: 90 },
-    { day: "Sun", minutes: 40, confidence: 60 },
-  ];
+  const navigate = useNavigate();
+  const [user, setUser] = useState<any>(null);
+  const [subjects, setSubjects] = useState<any[]>([]);
+  const [marks, setMarks] = useState<any[]>([]);
+  const [chartData, setChartData] = useState<any[]>([]);
+  const [weakSubjects, setWeakSubjects] = useState<any[]>([]);
 
-  const subjects = [
-    { name: "Mathematics", progress: 85, color: "hsl(var(--primary))" },
-    { name: "Physics", progress: 70, color: "hsl(var(--accent))" },
-    { name: "Chemistry", progress: 60, color: "hsl(var(--success))" },
-    { name: "Biology", progress: 45, color: "hsl(var(--warning))" },
-  ];
+  useEffect(() => {
+    checkUser();
+  }, []);
 
-  const stats = [
-    { icon: Clock, label: "Study Time", value: "12.5 hrs", subtext: "This week", color: "primary" },
-    { icon: Brain, label: "Quizzes Taken", value: "24", subtext: "Last 7 days", color: "accent" },
-    { icon: Target, label: "Avg Confidence", value: "78%", subtext: "+5% from last week", color: "success" },
-    { icon: Flame, label: "Streak", value: "7 days", subtext: "Keep it up!", color: "warning" },
-  ];
+  const checkUser = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      navigate("/auth");
+      return;
+    }
+    setUser(session.user);
+    fetchData(session.user.id);
+  };
+
+  const fetchData = async (userId: string) => {
+    try {
+      const { data: subjectsData } = await supabase
+        .from("subjects")
+        .select("*")
+        .eq("user_id", userId);
+
+      const { data: marksData } = await supabase
+        .from("marks")
+        .select("*")
+        .eq("user_id", userId)
+        .eq("exam_type", "previous");
+
+      setSubjects(subjectsData || []);
+      setMarks(marksData || []);
+
+      if (subjectsData && marksData) {
+        const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"];
+        const data = subjectsData.map((subject, index) => {
+          const mark = marksData.find((m) => m.subject_id === subject.id);
+          const percentage = mark ? (mark.marks_obtained / mark.total_marks) * 100 : 0;
+          return {
+            name: subject.subject_name,
+            value: percentage,
+            color: COLORS[index % COLORS.length],
+          };
+        });
+        setChartData(data);
+
+        const weak = data.filter((d) => d.value < 60).map((d) => d.name);
+        setWeakSubjects(weak);
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+  if (!user) {
+    return <div>Loading...</div>;
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-subtle">
+    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-primary/10">
       <Navbar />
       <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Welcome back, Student! 👋</h1>
-          <p className="text-muted-foreground">Here's your learning progress overview</p>
+        <div className="mb-8 flex justify-between items-center">
+          <div>
+            <h1 className="text-4xl font-bold mb-2">Welcome back! 👋</h1>
+            <p className="text-muted-foreground">Here's your learning progress overview</p>
+          </div>
+          <Button onClick={() => navigate("/profile")} variant="outline" className="gap-2">
+            <User className="h-4 w-4" />
+            Profile
+          </Button>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {stats.map((stat) => (
-            <Card key={stat.label} className="bg-card hover:shadow-lg transition-shadow">
-              <CardContent className="pt-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className={`p-3 rounded-lg bg-${stat.color}/10`}>
-                    <stat.icon className={`h-6 w-6 text-${stat.color}`} />
-                  </div>
-                </div>
-                <div>
-                  <p className="text-2xl font-bold mb-1">{stat.value}</p>
-                  <p className="text-sm text-muted-foreground mb-1">{stat.label}</p>
-                  <p className="text-xs text-muted-foreground">{stat.subtext}</p>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        {weakSubjects.length > 0 && (
+          <Alert className="mb-6 border-warning bg-warning/10">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Focus Alert!</AlertTitle>
+            <AlertDescription>
+              You need to focus more on: {weakSubjects.join(", ")}. These subjects scored below 60%.
+            </AlertDescription>
+          </Alert>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Weekly Activity Chart */}
           <Card>
             <CardHeader>
-              <CardTitle>Weekly Study Time</CardTitle>
-              <CardDescription>Your study minutes per day this week</CardDescription>
+              <CardTitle>Previous Exam Performance</CardTitle>
+              <CardDescription>Your marks distribution across subjects</CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={weeklyData}>
-                  <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                  <XAxis dataKey="day" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="minutes" radius={[8, 8, 0, 0]}>
-                    {weeklyData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill="hsl(var(--primary))" opacity={0.8} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+              {chartData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={chartData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ name, value }) => `${name}: ${value.toFixed(1)}%`}
+                      outerRadius={100}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {chartData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="text-center py-12 text-muted-foreground">
+                  No exam data available yet
+                </div>
+              )}
             </CardContent>
           </Card>
 
-          {/* Subject Progress */}
           <Card>
             <CardHeader>
-              <CardTitle>Subject Mastery</CardTitle>
-              <CardDescription>Your progress across different subjects</CardDescription>
+              <CardTitle>Quick Actions</CardTitle>
+              <CardDescription>Continue your learning journey</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              {subjects.map((subject) => (
-                <div key={subject.name}>
-                  <div className="flex justify-between mb-2">
-                    <span className="text-sm font-medium">{subject.name}</span>
-                    <span className="text-sm text-muted-foreground">{subject.progress}%</span>
-                  </div>
-                  <Progress value={subject.progress} className="h-2" />
-                </div>
-              ))}
+            <CardContent className="flex flex-col gap-4">
+              <Button onClick={() => navigate("/study")} className="gap-2 w-full">
+                <BookOpen className="h-4 w-4" />
+                Start Study Session
+              </Button>
+              <Button onClick={() => navigate("/quiz")} variant="outline" className="gap-2 w-full">
+                <Brain className="h-4 w-4" />
+                Take Quiz
+              </Button>
+              <Button onClick={() => navigate("/progress")} variant="outline" className="gap-2 w-full">
+                View Full Progress
+              </Button>
             </CardContent>
           </Card>
         </div>
 
-        {/* Quick Actions */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-            <CardDescription>Continue your learning journey</CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-wrap gap-4">
-            <Button className="gap-2">
-              <BookOpen className="h-4 w-4" />
-              Start Study Session
-            </Button>
-            <Button variant="outline" className="gap-2">
-              <Brain className="h-4 w-4" />
-              Take Quiz
-            </Button>
-            <Button variant="outline" className="gap-2">
-              <TrendingUp className="h-4 w-4" />
-              View Insights
-            </Button>
-          </CardContent>
-        </Card>
+        <AIChatBot />
       </main>
     </div>
   );

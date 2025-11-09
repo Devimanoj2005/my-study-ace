@@ -1,19 +1,29 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Play, Pause, Square, Clock } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Play, Pause, Square, Clock, Brain } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const Study = () => {
+  const navigate = useNavigate();
+  const [user, setUser] = useState<any>(null);
+  const [subjects, setSubjects] = useState<any[]>([]);
+  const [selectedSubject, setSelectedSubject] = useState("");
   const [isStudying, setIsStudying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [seconds, setSeconds] = useState(0);
   const [topic, setTopic] = useState("");
-  const [notes, setNotes] = useState("");
+  const [generatingQuiz, setGeneratingQuiz] = useState(false);
+
+  useEffect(() => {
+    checkUser();
+  }, []);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -25,6 +35,25 @@ const Study = () => {
     return () => clearInterval(interval);
   }, [isStudying, isPaused]);
 
+  const checkUser = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      navigate("/auth");
+      return;
+    }
+    setUser(session.user);
+    fetchSubjects(session.user.id);
+  };
+
+  const fetchSubjects = async (userId: string) => {
+    const { data } = await supabase
+      .from("subjects")
+      .select("*")
+      .eq("user_id", userId)
+      .order("subject_number");
+    setSubjects(data || []);
+  };
+
   const formatTime = (totalSeconds: number) => {
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -33,8 +62,8 @@ const Study = () => {
   };
 
   const handleStart = () => {
-    if (!topic) {
-      toast.error("Please enter a topic to study");
+    if (!topic || !selectedSubject) {
+      toast.error("Please select a subject and enter a topic to study");
       return;
     }
     setIsStudying(true);
@@ -47,11 +76,45 @@ const Study = () => {
     toast.info(isPaused ? "Session resumed" : "Session paused");
   };
 
-  const handleStop = () => {
+  const handleStop = async () => {
     setIsStudying(false);
     setIsPaused(false);
     toast.success(`Study session completed! Duration: ${formatTime(seconds)}`);
-    // Here we would generate a quiz
+    
+    // Save study session
+    if (user && selectedSubject) {
+      await supabase.from("study_sessions").insert({
+        user_id: user.id,
+        subject_id: selectedSubject,
+        topic: topic,
+        completed_at: new Date().toISOString(),
+      });
+    }
+  };
+
+  const handleGenerateQuiz = async () => {
+    if (!selectedSubject || !topic) {
+      toast.error("Please select a subject and topic first");
+      return;
+    }
+
+    setGeneratingQuiz(true);
+    try {
+      const subject = subjects.find((s) => s.id === selectedSubject);
+      const { data, error } = await supabase.functions.invoke("generate-quiz", {
+        body: { subject: subject.subject_name, topic },
+      });
+
+      if (error) throw error;
+
+      // Store quiz in session storage and navigate to quiz page
+      sessionStorage.setItem("currentQuiz", JSON.stringify(data));
+      navigate("/quiz");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to generate quiz");
+    } finally {
+      setGeneratingQuiz(false);
+    }
   };
 
   return (
@@ -111,26 +174,41 @@ const Study = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
+                <Label htmlFor="subject">Subject</Label>
+                <Select value={selectedSubject} onValueChange={setSelectedSubject} disabled={isStudying}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a subject" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {subjects.map((subject) => (
+                      <SelectItem key={subject.id} value={subject.id}>
+                        {subject.subject_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="topic">Topic</Label>
                 <Input
                   id="topic"
-                  placeholder="e.g., Calculus - Integration"
+                  placeholder="e.g., Integration by Parts"
                   value={topic}
                   onChange={(e) => setTopic(e.target.value)}
                   disabled={isStudying}
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="notes">Quick Notes</Label>
-                <Textarea
-                  id="notes"
-                  placeholder="Jot down key points or questions..."
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  rows={8}
-                />
-              </div>
+              <Button
+                onClick={handleGenerateQuiz}
+                disabled={!selectedSubject || !topic || generatingQuiz}
+                className="w-full gap-2"
+                variant="outline"
+              >
+                <Brain className="h-4 w-4" />
+                {generatingQuiz ? "Generating..." : "Generate Quiz on This Topic"}
+              </Button>
 
               <div className="pt-4 space-y-3 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
