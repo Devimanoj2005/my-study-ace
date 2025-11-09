@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Play, Pause, Square, Clock, Brain } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useAchievements } from "@/hooks/useAchievements";
+import { useStreak } from "@/hooks/useStreak";
 
 const Study = () => {
   const navigate = useNavigate();
@@ -20,6 +22,9 @@ const Study = () => {
   const [seconds, setSeconds] = useState(0);
   const [topic, setTopic] = useState("");
   const [generatingQuiz, setGeneratingQuiz] = useState(false);
+
+  const { checkAndAwardAchievement } = useAchievements(user?.id);
+  const { updateStreak, streak } = useStreak(user?.id);
 
   useEffect(() => {
     checkUser();
@@ -89,7 +94,17 @@ const Study = () => {
         topic: topic,
         completed_at: new Date().toISOString(),
       });
+
+      // Update streak and check for achievements
+      const result = await updateStreak("study");
+      if (result) {
+        await checkAndAwardAchievement("study", result.totalStudy, "count");
+        await checkAndAwardAchievement("streak", result.currentStreak, "streak");
+      }
     }
+
+    // Reset timer
+    setSeconds(0);
   };
 
   const handleGenerateQuiz = async () => {

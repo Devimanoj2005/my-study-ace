@@ -4,11 +4,16 @@ import Navbar from "@/components/Navbar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
-import { BookOpen, Brain, AlertTriangle, User } from "lucide-react";
+import { BookOpen, Brain, AlertTriangle, User, Award } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import AIChatBot from "@/components/AIChatBot";
 import StudyBuddy from "@/components/StudyBuddy";
+import { useAchievements } from "@/hooks/useAchievements";
+import { useStreak } from "@/hooks/useStreak";
+import AchievementCard from "@/components/AchievementCard";
+import StreakDisplay from "@/components/StreakDisplay";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -19,6 +24,9 @@ const Dashboard = () => {
   const [weakSubjects, setWeakSubjects] = useState<any[]>([]);
   const [buddyMood, setBuddyMood] = useState<"happy" | "encouraging" | "neutral" | "celebrating">("neutral");
   const [buddyMessage, setBuddyMessage] = useState<string>("");
+  
+  const { achievements, userAchievements, checkAndAwardAchievement } = useAchievements(user?.id);
+  const { streak, updateStreak } = useStreak(user?.id);
 
   useEffect(() => {
     checkUser();
@@ -180,6 +188,59 @@ const Dashboard = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Achievements and Streaks Section */}
+        <Tabs defaultValue="overview" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-6">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="achievements" className="gap-2">
+              <Award className="h-4 w-4" />
+              Achievements
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview" className="space-y-6">
+            {streak && (
+              <StreakDisplay
+                currentStreak={streak.current_streak}
+                longestStreak={streak.longest_streak}
+                totalStudySessions={streak.total_study_sessions}
+                totalQuizzes={streak.total_quizzes}
+              />
+            )}
+          </TabsContent>
+
+          <TabsContent value="achievements">
+            <Card className="backdrop-blur-sm bg-gradient-card border-primary/10">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <div className="w-2 h-8 bg-gradient-primary rounded-full" />
+                  Achievement Collection
+                </CardTitle>
+                <CardDescription className="text-base">
+                  Unlock badges by completing challenges - {userAchievements.length} of {achievements.length} earned
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {achievements.map((achievement) => {
+                    const userAchievement = userAchievements.find(
+                      (ua) => ua.achievement_id === achievement.id
+                    );
+                    return (
+                      <AchievementCard
+                        key={achievement.id}
+                        achievement={achievement}
+                        isUnlocked={!!userAchievement}
+                        earnedAt={userAchievement?.earned_at}
+                      />
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
 
         <AIChatBot />
         <StudyBuddy mood={buddyMood} message={buddyMessage} />

@@ -9,6 +9,9 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, XCircle, Brain } from "lucide-react";
 import { toast } from "sonner";
+import { useAchievements } from "@/hooks/useAchievements";
+import { useStreak } from "@/hooks/useStreak";
+import { useNavigate } from "react-router-dom";
 
 interface Question {
   id: number;
@@ -18,14 +21,21 @@ interface Question {
 }
 
 const Quiz = () => {
+  const navigate = useNavigate();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string>("");
   const [confidence, setConfidence] = useState<"low" | "medium" | "high" | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
   const [questions, setQuestions] = useState<Question[]>([]);
+  const [userId, setUserId] = useState<string | undefined>();
+  const [correctCount, setCorrectCount] = useState(0);
+
+  const { checkAndAwardAchievement } = useAchievements(userId);
+  const { updateStreak } = useStreak(userId);
 
   useEffect(() => {
+    checkUser();
     // Load quiz from session storage
     const quizData = sessionStorage.getItem("currentQuiz");
     if (quizData) {
@@ -33,6 +43,13 @@ const Quiz = () => {
       setQuestions(parsedQuiz.questions || []);
     }
   }, []);
+
+  const checkUser = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      setUserId(session.user.id);
+    }
+  };
 
   if (questions.length === 0) {
     return (
@@ -64,6 +81,10 @@ const Quiz = () => {
     const correct = parseInt(selectedAnswer) === questions[currentQuestion].correctAnswer;
     setIsCorrect(correct);
     setShowResult(true);
+    
+    if (correct) {
+      setCorrectCount(prev => prev + 1);
+    }
 
     // Save quiz result to database
     const subjectId = sessionStorage.getItem("currentQuizSubject");
@@ -84,7 +105,7 @@ const Quiz = () => {
     toast.success(correct ? "Correct! 🎉" : "Keep practicing! 💪");
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
       setSelectedAnswer("");
@@ -92,6 +113,24 @@ const Quiz = () => {
       setShowResult(false);
     } else {
       toast.success("Quiz completed! Great job!");
+      
+      // Update streak and check for achievements
+      if (userId) {
+        const result = await updateStreak("quiz");
+        if (result) {
+          await checkAndAwardAchievement("quiz", result.totalQuiz, "count");
+          await checkAndAwardAchievement("streak", result.currentStreak, "streak");
+          
+          // Check for perfect score achievement
+          const score = (correctCount / questions.length) * 100;
+          if (score === 100) {
+            await checkAndAwardAchievement("quiz", 100, "score");
+          }
+        }
+      }
+      
+      // Navigate to dashboard after a short delay
+      setTimeout(() => navigate("/dashboard"), 2000);
     }
   };
 

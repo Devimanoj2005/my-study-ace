@@ -8,24 +8,24 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 240 50% 98%;
-    --foreground: 240 20% 12%;
+    --background: 240 15% 12%;
+    --foreground: 240 20% 95%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 240 20% 12%;
+    --card: 240 12% 15%;
+    --card-foreground: 240 20% 95%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 20% 12%;
+    --popover: 240 12% 15%;
+    --popover-foreground: 240 20% 95%;
 
     --primary: 262 83% 58%;
     --primary-foreground: 0 0% 100%;
     --primary-glow: 262 90% 70%;
 
-    --secondary: 280 40% 96%;
-    --secondary-foreground: 240 20% 12%;
+    --secondary: 240 10% 20%;
+    --secondary-foreground: 240 20% 95%;
 
-    --muted: 240 30% 94%;
-    --muted-foreground: 240 10% 50%;
+    --muted: 240 10% 18%;
+    --muted-foreground: 240 10% 60%;
 
     --accent: 340 85% 60%;
     --accent-foreground: 0 0% 100%;
@@ -35,13 +35,13 @@ All colors MUST be HSL.
     --success-foreground: 0 0% 100%;
 
     --warning: 38 92% 55%;
-    --warning-foreground: 0 0% 100%;
+    --warning-foreground: 240 15% 12%;
 
     --destructive: 0 85% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 240 20% 90%;
-    --input: 240 20% 90%;
+    --border: 240 15% 22%;
+    --input: 240 15% 22%;
     --ring: 262 83% 58%;
 
     --radius: 1rem;
@@ -49,18 +49,18 @@ All colors MUST be HSL.
     --gradient-primary: linear-gradient(135deg, hsl(262, 83%, 58%), hsl(340, 85%, 60%));
     --gradient-secondary: linear-gradient(135deg, hsl(200, 95%, 55%), hsl(280, 80%, 65%));
     --gradient-accent: linear-gradient(135deg, hsl(340, 85%, 60%), hsl(20, 90%, 60%));
-    --gradient-subtle: linear-gradient(180deg, hsl(240, 50%, 98%), hsl(260, 60%, 96%));
-    --gradient-card: linear-gradient(135deg, hsl(0, 0%, 100%) 0%, hsl(260, 60%, 98%) 100%);
-    --gradient-mesh: radial-gradient(at 20% 30%, hsl(262, 83%, 58%) 0px, transparent 50%), 
-                     radial-gradient(at 80% 70%, hsl(340, 85%, 60%) 0px, transparent 50%),
-                     radial-gradient(at 40% 80%, hsl(200, 95%, 55%) 0px, transparent 50%);
+    --gradient-subtle: linear-gradient(180deg, hsl(240, 15%, 12%), hsl(240, 15%, 16%));
+    --gradient-card: linear-gradient(135deg, hsl(240, 12%, 15%) 0%, hsl(260, 15%, 17%) 100%);
+    --gradient-mesh: radial-gradient(at 20% 30%, hsl(262, 83%, 38%) 0px, transparent 50%), 
+                     radial-gradient(at 80% 70%, hsl(340, 85%, 40%) 0px, transparent 50%),
+                     radial-gradient(at 40% 80%, hsl(200, 95%, 35%) 0px, transparent 50%);
     
-    --shadow-sm: 0 1px 2px 0 hsl(240 20% 12% / 0.05);
-    --shadow-md: 0 4px 12px -2px hsl(240 20% 12% / 0.12);
-    --shadow-lg: 0 20px 25px -5px hsl(240 20% 12% / 0.15);
-    --shadow-xl: 0 25px 50px -12px hsl(240 20% 12% / 0.25);
-    --shadow-glow: 0 0 60px hsl(262 83% 58% / 0.4);
-    --shadow-glow-accent: 0 0 60px hsl(340 85% 60% / 0.4);
+    --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.3);
+    --shadow-md: 0 4px 12px -2px hsl(0 0% 0% / 0.5);
+    --shadow-lg: 0 20px 25px -5px hsl(0 0% 0% / 0.6);
+    --shadow-xl: 0 25px 50px -12px hsl(0 0% 0% / 0.8);
+    --shadow-glow: 0 0 60px hsl(262 83% 58% / 0.5);
+    --shadow-glow-accent: 0 0 60px hsl(340 85% 60% / 0.5);
 
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);

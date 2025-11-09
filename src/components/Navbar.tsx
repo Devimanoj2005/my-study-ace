@@ -14,7 +14,7 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className="sticky top-0 z-50 bg-background/70 backdrop-blur-xl border-b border-primary/10 shadow-md">
+    <nav className="sticky top-0 z-50 bg-card/70 backdrop-blur-xl border-b border-primary/10 shadow-md">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           <Link to="/" className="flex items-center gap-3 group">
