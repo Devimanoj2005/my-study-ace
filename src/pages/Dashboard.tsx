@@ -92,35 +92,40 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-primary/10">
+    <div className="min-h-screen bg-gradient-mesh bg-fixed">
       <Navbar />
       <main className="container mx-auto px-4 py-8">
-        <div className="mb-8 flex justify-between items-center">
+        <div className="mb-8 flex justify-between items-center animate-fade-in">
           <div>
-            <h1 className="text-4xl font-bold mb-2">Welcome back! 👋</h1>
-            <p className="text-muted-foreground">Here's your learning progress overview</p>
+            <h1 className="text-5xl font-extrabold mb-3 bg-gradient-primary bg-clip-text text-transparent">
+              Welcome back! 👋
+            </h1>
+            <p className="text-muted-foreground text-lg">Here's your learning progress overview</p>
           </div>
-          <Button onClick={() => navigate("/profile")} variant="outline" className="gap-2">
-            <User className="h-4 w-4" />
+          <Button onClick={() => navigate("/profile")} variant="outline" className="gap-2 group">
+            <User className="h-4 w-4 group-hover:rotate-12 transition-transform" />
             Profile
           </Button>
         </div>
 
         {weakSubjects.length > 0 && (
-          <Alert className="mb-6 border-warning bg-warning/10">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Focus Alert!</AlertTitle>
-            <AlertDescription>
-              You need to focus more on: {weakSubjects.join(", ")}. These subjects scored below 60%.
+          <Alert className="mb-6 border-warning bg-gradient-accent/10 backdrop-blur-sm animate-fade-up shadow-lg">
+            <AlertTriangle className="h-5 w-5 text-warning animate-pulse" />
+            <AlertTitle className="text-lg font-bold">Focus Alert!</AlertTitle>
+            <AlertDescription className="text-base">
+              You need to focus more on: <span className="font-semibold text-foreground">{weakSubjects.join(", ")}</span>. These subjects scored below 60%.
             </AlertDescription>
           </Alert>
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <Card>
+          <Card className="animate-fade-up overflow-hidden backdrop-blur-sm bg-gradient-card border-primary/10">
             <CardHeader>
-              <CardTitle>Previous Exam Performance</CardTitle>
-              <CardDescription>Your marks distribution across subjects</CardDescription>
+              <CardTitle className="flex items-center gap-2">
+                <div className="w-2 h-8 bg-gradient-primary rounded-full" />
+                Previous Exam Performance
+              </CardTitle>
+              <CardDescription className="text-base">Your marks distribution across subjects</CardDescription>
             </CardHeader>
             <CardContent>
               {chartData.length > 0 ? (
@@ -152,21 +157,24 @@ const Dashboard = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="animate-fade-up overflow-hidden backdrop-blur-sm bg-gradient-card border-accent/10" style={{ animationDelay: "0.1s" }}>
             <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
-              <CardDescription>Continue your learning journey</CardDescription>
+              <CardTitle className="flex items-center gap-2">
+                <div className="w-2 h-8 bg-gradient-accent rounded-full" />
+                Quick Actions
+              </CardTitle>
+              <CardDescription className="text-base">Continue your learning journey</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-4">
-              <Button onClick={() => navigate("/study")} className="gap-2 w-full">
-                <BookOpen className="h-4 w-4" />
+              <Button onClick={() => navigate("/study")} className="gap-2 w-full h-14 text-base group">
+                <BookOpen className="h-5 w-5 group-hover:scale-110 transition-transform" />
                 Start Study Session
               </Button>
-              <Button onClick={() => navigate("/quiz")} variant="outline" className="gap-2 w-full">
-                <Brain className="h-4 w-4" />
+              <Button onClick={() => navigate("/quiz")} variant="secondary" className="gap-2 w-full h-14 text-base group">
+                <Brain className="h-5 w-5 group-hover:scale-110 transition-transform" />
                 Take Quiz
               </Button>
-              <Button onClick={() => navigate("/progress")} variant="outline" className="gap-2 w-full">
+              <Button onClick={() => navigate("/progress")} variant="outline" className="gap-2 w-full h-14 text-base group">
                 View Full Progress
               </Button>
             </CardContent>

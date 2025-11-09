@@ -41,15 +41,15 @@ const StudyBuddy = ({ mood, message }: StudyBuddyProps) => {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
+    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
       {message && (
         <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: 20 }}
-          className="bg-card border border-border rounded-lg p-3 shadow-lg max-w-xs"
+          initial={{ opacity: 0, x: 20, scale: 0.9 }}
+          animate={{ opacity: 1, x: 0, scale: 1 }}
+          exit={{ opacity: 0, x: 20, scale: 0.9 }}
+          className="bg-gradient-card border-2 border-primary/20 rounded-2xl p-4 shadow-xl max-w-xs backdrop-blur-sm"
         >
-          <p className="text-sm text-foreground">{message}</p>
+          <p className="text-sm font-medium text-foreground">{message}</p>
         </motion.div>
       )}
       
@@ -58,12 +58,17 @@ const StudyBuddy = ({ mood, message }: StudyBuddyProps) => {
         transition={{ duration: 0.6, ease: "easeInOut" }}
         className="relative"
       >
-        <div 
-          className="w-20 h-20 rounded-full flex items-center justify-center text-4xl shadow-lg cursor-pointer hover:scale-110 transition-transform"
-          style={{ backgroundColor: getBuddyColor() }}
+        <motion.div
+          whileHover={{ scale: 1.1, rotate: 5 }}
+          whileTap={{ scale: 0.95 }}
+          className="w-24 h-24 rounded-full flex items-center justify-center text-5xl shadow-xl cursor-pointer"
+          style={{ 
+            backgroundColor: getBuddyColor(),
+            boxShadow: `0 0 30px ${getBuddyColor()}80`
+          }}
         >
           {getBuddyEmoji()}
-        </div>
+        </motion.div>
       </motion.div>
     </div>
   );

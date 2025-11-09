@@ -14,14 +14,14 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
+    <nav className="sticky top-0 z-50 bg-background/70 backdrop-blur-xl border-b border-primary/10 shadow-md">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 group">
-            <div className="p-2 rounded-lg bg-gradient-primary">
+          <Link to="/" className="flex items-center gap-3 group">
+            <div className="p-2 rounded-xl bg-gradient-primary shadow-glow group-hover:scale-110 transition-transform">
               <Brain className="h-6 w-6 text-primary-foreground" />
             </div>
-            <span className="font-bold text-xl bg-gradient-primary bg-clip-text text-transparent">
+            <span className="font-extrabold text-xl bg-gradient-primary bg-clip-text text-transparent">
               Smart Study Partner
             </span>
           </Link>
@@ -32,9 +32,10 @@ const Navbar = () => {
               <Link
                 key={link.href}
                 to={link.href}
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                className="text-sm font-semibold text-muted-foreground hover:text-primary transition-all hover:scale-110 relative group"
               >
                 {link.label}
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-primary group-hover:w-full transition-all duration-300" />
               </Link>
             ))}
             <Button variant="default" size="sm" className="ml-4">
