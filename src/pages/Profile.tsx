@@ -5,6 +5,10 @@ import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -14,6 +18,7 @@ interface Subject {
   id: string;
   subject_name: string;
   subject_number: number;
+  exam_date?: string;
 }
 
 interface Mark {
@@ -135,6 +140,30 @@ const Profile = () => {
     }
   };
 
+  const handleUpdateExamDate = async (subjectId: string, date: Date | undefined) => {
+    try {
+      const { error } = await supabase
+        .from("subjects")
+        .update({ exam_date: date?.toISOString() })
+        .eq("id", subjectId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success!",
+        description: "Exam date updated successfully",
+      });
+
+      fetchProfileData(user.id);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate("/");
@@ -199,9 +228,26 @@ const Profile = () => {
 
               return (
                 <div key={subject.id} className="border rounded-lg p-4 space-y-4">
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center mb-4">
                     <h3 className="font-semibold text-lg">{subject.subject_name}</h3>
-                    {hasProgress && (
+                    <div className="flex items-center gap-4">
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button variant="outline" size="sm" className="gap-2">
+                            <CalendarIcon className="h-4 w-4" />
+                            {subject.exam_date ? format(new Date(subject.exam_date), "PPP") : "Set Exam Date"}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                          <Calendar
+                            mode="single"
+                            selected={subject.exam_date ? new Date(subject.exam_date) : undefined}
+                            onSelect={(date) => handleUpdateExamDate(subject.id, date)}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      {hasProgress && (
                       <div className="flex items-center gap-2">
                         {progress[subject.id] > 0 ? (
                           <>
@@ -219,7 +265,8 @@ const Profile = () => {
                           </>
                         )}
                       </div>
-                    )}
+                      )}
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

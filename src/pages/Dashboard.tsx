@@ -8,6 +8,7 @@ import { BookOpen, Brain, AlertTriangle, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import AIChatBot from "@/components/AIChatBot";
+import StudyBuddy from "@/components/StudyBuddy";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -16,6 +17,8 @@ const Dashboard = () => {
   const [marks, setMarks] = useState<any[]>([]);
   const [chartData, setChartData] = useState<any[]>([]);
   const [weakSubjects, setWeakSubjects] = useState<any[]>([]);
+  const [buddyMood, setBuddyMood] = useState<"happy" | "encouraging" | "neutral" | "celebrating">("neutral");
+  const [buddyMessage, setBuddyMessage] = useState<string>("");
 
   useEffect(() => {
     checkUser();
@@ -62,6 +65,22 @@ const Dashboard = () => {
 
         const weak = data.filter((d) => d.value < 60).map((d) => d.name);
         setWeakSubjects(weak);
+
+        // Update study buddy mood based on performance
+        const avgPerformance = data.reduce((acc, curr) => acc + curr.value, 0) / data.length;
+        if (avgPerformance >= 80) {
+          setBuddyMood("celebrating");
+          setBuddyMessage("Outstanding! You're crushing it! 🎉");
+        } else if (avgPerformance >= 60) {
+          setBuddyMood("happy");
+          setBuddyMessage("Great work! Keep up the good progress! 😊");
+        } else if (weak.length > 0) {
+          setBuddyMood("encouraging");
+          setBuddyMessage("Don't give up! Focus on weak areas and you'll improve! 💪");
+        } else {
+          setBuddyMood("neutral");
+          setBuddyMessage("Ready to learn? Let's get started! 📚");
+        }
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -155,6 +174,7 @@ const Dashboard = () => {
         </div>
 
         <AIChatBot />
+        <StudyBuddy mood={buddyMood} message={buddyMessage} />
       </main>
     </div>
   );

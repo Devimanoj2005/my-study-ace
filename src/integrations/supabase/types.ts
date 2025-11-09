@@ -224,6 +224,42 @@ export type Database = {
           },
         ]
       }
+      revision_schedule: {
+        Row: {
+          completed: boolean
+          confidence_level: string | null
+          created_at: string
+          id: string
+          priority: string
+          scheduled_date: string
+          subject_id: string
+          topic: string
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean
+          confidence_level?: string | null
+          created_at?: string
+          id?: string
+          priority?: string
+          scheduled_date: string
+          subject_id: string
+          topic: string
+          user_id: string
+        }
+        Update: {
+          completed?: boolean
+          confidence_level?: string | null
+          created_at?: string
+          id?: string
+          priority?: string
+          scheduled_date?: string
+          subject_id?: string
+          topic?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       study_sessions: {
         Row: {
           completed_at: string | null
@@ -265,6 +301,7 @@ export type Database = {
       subjects: {
         Row: {
           created_at: string | null
+          exam_date: string | null
           id: string
           subject_name: string
           subject_number: number
@@ -272,6 +309,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          exam_date?: string | null
           id?: string
           subject_name: string
           subject_number: number
@@ -279,6 +317,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          exam_date?: string | null
           id?: string
           subject_name?: string
           subject_number?: number
