@@ -11,7 +11,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { subject, topic, content } = await req.json();
+    const { content } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
     if (!LOVABLE_API_KEY) {
@@ -30,13 +30,11 @@ Deno.serve(async (req) => {
           {
             role: "system",
             content:
-              "You are a quiz generator. Generate 5 multiple choice questions based on the given subject and topic. Return the response in JSON format with the following structure: { questions: [{ question: string, options: string[], correctAnswer: number (index of correct option) }] }",
+              "You are a flashcard generator. Create 10-15 flashcards from the given content. Each flashcard should have a clear question on the front and a concise answer on the back. Return the response in JSON format with the following structure: { flashcards: [{ front: string, back: string }] }",
           },
           {
             role: "user",
-            content: content 
-              ? `Generate 5 multiple choice questions based on this content about ${topic} in ${subject}:\n\n${content}`
-              : `Generate 5 multiple choice questions about ${topic} in ${subject}`,
+            content: `Generate flashcards from this content:\n\n${content}`,
           },
         ],
       }),
@@ -80,13 +78,13 @@ Deno.serve(async (req) => {
       aiResponse = jsonMatch[0];
     }
 
-    const quizData = JSON.parse(aiResponse);
+    const flashcardsData = JSON.parse(aiResponse);
 
-    return new Response(JSON.stringify(quizData), {
+    return new Response(JSON.stringify(flashcardsData), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("Error in generate-quiz function:", error);
+    console.error("Error in generate-flashcards function:", error);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

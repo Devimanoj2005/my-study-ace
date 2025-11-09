@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -22,32 +23,34 @@ const Quiz = () => {
   const [confidence, setConfidence] = useState<"low" | "medium" | "high" | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
+  const [questions, setQuestions] = useState<Question[]>([]);
 
-  // Mock quiz data
-  const questions: Question[] = [
-    {
-      id: 1,
-      question: "What is the derivative of x²?",
-      options: ["x", "2x", "x²", "2"],
-      correctAnswer: 1,
-    },
-    {
-      id: 2,
-      question: "What is the integral of 1/x?",
-      options: ["ln(x)", "x", "1/x²", "e^x"],
-      correctAnswer: 0,
-    },
-    {
-      id: 3,
-      question: "What is the limit of sin(x)/x as x approaches 0?",
-      options: ["0", "1", "∞", "undefined"],
-      correctAnswer: 1,
-    },
-  ];
+  useEffect(() => {
+    // Load quiz from session storage
+    const quizData = sessionStorage.getItem("currentQuiz");
+    if (quizData) {
+      const parsedQuiz = JSON.parse(quizData);
+      setQuestions(parsedQuiz.questions || []);
+    }
+  }, []);
+
+  if (questions.length === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-subtle">
+        <Navbar />
+        <main className="container mx-auto px-4 py-8">
+          <div className="max-w-3xl mx-auto text-center">
+            <h1 className="text-4xl font-bold mb-4">No Quiz Available</h1>
+            <p className="text-muted-foreground">Please generate a quiz from the Notes or Study page first.</p>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   const progress = ((currentQuestion + 1) / questions.length) * 100;
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!selectedAnswer) {
       toast.error("Please select an answer");
       return;
@@ -61,6 +64,22 @@ const Quiz = () => {
     const correct = parseInt(selectedAnswer) === questions[currentQuestion].correctAnswer;
     setIsCorrect(correct);
     setShowResult(true);
+
+    // Save quiz result to database
+    const subjectId = sessionStorage.getItem("currentQuizSubject");
+    if (subjectId) {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        await supabase.from("quiz_results").insert({
+          user_id: session.user.id,
+          subject_id: subjectId,
+          topic: questions[currentQuestion].question,
+          score: correct ? 1 : 0,
+          total_questions: 1,
+          confidence_level: confidence,
+        });
+      }
+    }
 
     toast.success(correct ? "Correct! 🎉" : "Keep practicing! 💪");
   };

@@ -14,6 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      flashcards: {
+        Row: {
+          back: string
+          created_at: string
+          front: string
+          id: string
+          next_review_date: string
+          note_id: string
+          review_count: number
+          user_id: string
+        }
+        Insert: {
+          back: string
+          created_at?: string
+          front: string
+          id?: string
+          next_review_date?: string
+          note_id: string
+          review_count?: number
+          user_id: string
+        }
+        Update: {
+          back?: string
+          created_at?: string
+          front?: string
+          id?: string
+          next_review_date?: string
+          note_id?: string
+          review_count?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "flashcards_note_id_fkey"
+            columns: ["note_id"]
+            isOneToOne: false
+            referencedRelation: "notes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       marks: {
         Row: {
           created_at: string | null
@@ -48,6 +89,47 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "marks_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notes: {
+        Row: {
+          created_at: string
+          id: string
+          original_content: string
+          simplified_content: string | null
+          subject_id: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          original_content: string
+          simplified_content?: string | null
+          subject_id: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          original_content?: string
+          simplified_content?: string | null
+          subject_id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notes_subject_id_fkey"
             columns: ["subject_id"]
             isOneToOne: false
             referencedRelation: "subjects"
@@ -90,6 +172,57 @@ export type Database = {
           username?: string
         }
         Relationships: []
+      }
+      quiz_results: {
+        Row: {
+          completed_at: string
+          confidence_level: string
+          id: string
+          note_id: string | null
+          score: number
+          subject_id: string
+          topic: string
+          total_questions: number
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string
+          confidence_level: string
+          id?: string
+          note_id?: string | null
+          score: number
+          subject_id: string
+          topic: string
+          total_questions: number
+          user_id: string
+        }
+        Update: {
+          completed_at?: string
+          confidence_level?: string
+          id?: string
+          note_id?: string | null
+          score?: number
+          subject_id?: string
+          topic?: string
+          total_questions?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_results_note_id_fkey"
+            columns: ["note_id"]
+            isOneToOne: false
+            referencedRelation: "notes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quiz_results_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       study_sessions: {
         Row: {

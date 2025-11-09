@@ -10,6 +10,7 @@ import Study from "./pages/Study";
 import Quiz from "./pages/Quiz";
 import Progress from "./pages/Progress";
 import Profile from "./pages/Profile";
+import Notes from "./pages/Notes";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/notes" element={<Notes />} />
           <Route path="/study" element={<Study />} />
           <Route path="/quiz" element={<Quiz />} />
           <Route path="/progress" element={<Progress />} />

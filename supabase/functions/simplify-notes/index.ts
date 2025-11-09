@@ -11,7 +11,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { subject, topic, content } = await req.json();
+    const { content, gradeLevel } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
     if (!LOVABLE_API_KEY) {
@@ -29,14 +29,11 @@ Deno.serve(async (req) => {
         messages: [
           {
             role: "system",
-            content:
-              "You are a quiz generator. Generate 5 multiple choice questions based on the given subject and topic. Return the response in JSON format with the following structure: { questions: [{ question: string, options: string[], correctAnswer: number (index of correct option) }] }",
+            content: `You are an educational AI that simplifies complex study notes for students. Convert the given notes into clear, easy-to-understand language suitable for ${gradeLevel || 'middle school'} students. Use simple words, short sentences, and helpful examples. Break down complex concepts into smaller, digestible parts.`,
           },
           {
             role: "user",
-            content: content 
-              ? `Generate 5 multiple choice questions based on this content about ${topic} in ${subject}:\n\n${content}`
-              : `Generate 5 multiple choice questions about ${topic} in ${subject}`,
+            content: `Simplify these study notes:\n\n${content}`,
           },
         ],
       }),
@@ -72,21 +69,13 @@ Deno.serve(async (req) => {
     }
 
     const data = await response.json();
-    let aiResponse = data.choices[0].message.content;
+    const simplifiedContent = data.choices[0].message.content;
 
-    // Try to extract JSON from the response
-    const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      aiResponse = jsonMatch[0];
-    }
-
-    const quizData = JSON.parse(aiResponse);
-
-    return new Response(JSON.stringify(quizData), {
+    return new Response(JSON.stringify({ simplifiedContent }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("Error in generate-quiz function:", error);
+    console.error("Error in simplify-notes function:", error);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

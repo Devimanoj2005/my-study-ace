@@ -1,1 +1,13 @@
 project_id = "mpjaujbkjguggyvjvoab"
+
+[functions.generate-quiz]
+verify_jwt = false
+
+[functions.ai-chat]
+verify_jwt = false
+
+[functions.simplify-notes]
+verify_jwt = false
+
+[functions.generate-flashcards]
+verify_jwt = false
