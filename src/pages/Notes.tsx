@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FileText, Brain, Sparkles, Trash2 } from "lucide-react";
+import { FileText, Brain, Sparkles, Trash2, Mic, Square, Upload, FileUp } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -21,6 +21,10 @@ const Notes = () => {
   const [content, setContent] = useState("");
   const [isSimplifying, setIsSimplifying] = useState(false);
   const [isGeneratingFlashcards, setIsGeneratingFlashcards] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
 
   useEffect(() => {
     checkUser();
@@ -55,6 +59,95 @@ const Notes = () => {
     setNotes(data || []);
   };
 
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        audioChunksRef.current.push(event.data);
+      };
+
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        await transcribeAudio(audioBlob);
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+      toast.success("Recording started");
+    } catch (error) {
+      toast.error("Failed to start recording. Please check microphone permissions.");
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+      toast.info("Processing audio...");
+    }
+  };
+
+  const transcribeAudio = async (audioBlob: Blob) => {
+    try {
+      setIsTranscribing(true);
+      
+      const reader = new FileReader();
+      reader.readAsDataURL(audioBlob);
+      reader.onloadend = async () => {
+        const base64Audio = reader.result?.toString().split(',')[1];
+        
+        const { data, error } = await supabase.functions.invoke('transcribe-audio', {
+          body: { audio: base64Audio }
+        });
+
+        if (error) throw error;
+
+        setContent(prev => prev + (prev ? '\n\n' : '') + data.text);
+        toast.success("Audio transcribed successfully!");
+      };
+    } catch (error: any) {
+      toast.error(error.message || "Failed to transcribe audio");
+    } finally {
+      setIsTranscribing(false);
+    }
+  };
+
+  const handlePdfUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      if (!event.target.files || event.target.files.length === 0) {
+        return;
+      }
+
+      const file = event.target.files[0];
+      
+      if (file.type !== 'application/pdf') {
+        toast.error("Please upload a PDF file");
+        return;
+      }
+
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${user.id}/${Date.now()}.${fileExt}`;
+
+      toast.info("Uploading PDF...");
+
+      const { error: uploadError } = await supabase.storage
+        .from('pdfs')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      toast.success("PDF uploaded! You can now take notes about it.");
+      setTitle(file.name.replace('.pdf', ''));
+    } catch (error: any) {
+      toast.error(error.message || "Failed to upload PDF");
+    }
+  };
+
   const handleSaveNote = async () => {
     if (!title || !content || !selectedSubject) {
       toast.error("Please fill in all fields");
@@ -64,7 +157,6 @@ const Notes = () => {
     try {
       setIsSimplifying(true);
       
-      // Simplify the notes using AI
       const { data: simplifiedData, error: simplifyError } = await supabase.functions.invoke(
         "simplify-notes",
         {
@@ -74,7 +166,6 @@ const Notes = () => {
 
       if (simplifyError) throw simplifyError;
 
-      // Save the note with simplified content
       const { error } = await supabase.from("notes").insert({
         user_id: user.id,
         subject_id: selectedSubject,
@@ -106,7 +197,6 @@ const Notes = () => {
 
       if (error) throw error;
 
-      // Save flashcards to database
       const flashcardsToInsert = data.flashcards.map((card: any) => ({
         user_id: user.id,
         note_id: noteId,
@@ -161,20 +251,19 @@ const Notes = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-subtle">
+    <div className="min-h-screen bg-gradient-mesh">
       <Navbar />
       <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Smart Notes</h1>
-          <p className="text-muted-foreground">Upload your notes and let AI simplify them for better understanding</p>
+        <div className="mb-8 animate-fade-in">
+          <h1 className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-2">Smart Notes</h1>
+          <p className="text-muted-foreground">Create, record, and organize your study notes with AI assistance</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Create Note Card */}
-          <Card className="lg:col-span-2">
+          <Card className="lg:col-span-2 animate-fade-up">
             <CardHeader>
               <CardTitle>Add New Notes</CardTitle>
-              <CardDescription>Write or paste your study notes here</CardDescription>
+              <CardDescription>Write, record, or upload your study notes</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -207,11 +296,48 @@ const Notes = () => {
                 <Label htmlFor="content">Notes Content</Label>
                 <Textarea
                   id="content"
-                  placeholder="Paste or type your notes here..."
+                  placeholder="Paste, type, or record your notes here..."
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
                   rows={10}
                   className="resize-none"
+                />
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  onClick={isRecording ? stopRecording : startRecording}
+                  disabled={isTranscribing}
+                  variant={isRecording ? "destructive" : "outline"}
+                  className="gap-2"
+                >
+                  {isRecording ? (
+                    <>
+                      <Square className="h-4 w-4" />
+                      Stop Recording
+                    </>
+                  ) : (
+                    <>
+                      <Mic className="h-4 w-4" />
+                      {isTranscribing ? "Transcribing..." : "Record Audio"}
+                    </>
+                  )}
+                </Button>
+
+                <label htmlFor="pdf-upload">
+                  <Button variant="outline" className="gap-2" asChild>
+                    <span>
+                      <FileUp className="h-4 w-4" />
+                      Upload PDF
+                    </span>
+                  </Button>
+                </label>
+                <input
+                  id="pdf-upload"
+                  type="file"
+                  accept="application/pdf"
+                  className="hidden"
+                  onChange={handlePdfUpload}
                 />
               </div>
 
@@ -226,18 +352,17 @@ const Notes = () => {
             </CardContent>
           </Card>
 
-          {/* Info Card */}
-          <Card>
+          <Card className="animate-fade-up" style={{ animationDelay: '0.1s' }}>
             <CardHeader>
               <CardTitle>AI Features</CardTitle>
-              <CardDescription>What can our AI do?</CardDescription>
+              <CardDescription>Powerful tools at your fingertips</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="p-3 rounded-lg bg-primary/5 border border-primary/10">
-                <div className="flex items-start gap-2">
+              <div className="p-4 rounded-lg bg-gradient-card border border-primary/20 hover:shadow-lg transition-all">
+                <div className="flex items-start gap-3">
                   <Brain className="h-5 w-5 mt-0.5 text-primary" />
                   <div>
-                    <h3 className="font-semibold text-sm">Simplify Notes</h3>
+                    <h3 className="font-semibold text-sm mb-1">Simplify Notes</h3>
                     <p className="text-xs text-muted-foreground">
                       AI converts complex notes into easy-to-understand language
                     </p>
@@ -245,11 +370,11 @@ const Notes = () => {
                 </div>
               </div>
 
-              <div className="p-3 rounded-lg bg-accent/5 border border-accent/10">
-                <div className="flex items-start gap-2">
+              <div className="p-4 rounded-lg bg-gradient-card border border-accent/20 hover:shadow-lg transition-all">
+                <div className="flex items-start gap-3">
                   <FileText className="h-5 w-5 mt-0.5 text-accent" />
                   <div>
-                    <h3 className="font-semibold text-sm">Generate Flashcards</h3>
+                    <h3 className="font-semibold text-sm mb-1">Generate Flashcards</h3>
                     <p className="text-xs text-muted-foreground">
                       Automatically create flashcards for quick revision
                     </p>
@@ -257,13 +382,25 @@ const Notes = () => {
                 </div>
               </div>
 
-              <div className="p-3 rounded-lg bg-success/5 border border-success/10">
-                <div className="flex items-start gap-2">
-                  <Sparkles className="h-5 w-5 mt-0.5 text-success" />
+              <div className="p-4 rounded-lg bg-gradient-card border border-success/20 hover:shadow-lg transition-all">
+                <div className="flex items-start gap-3">
+                  <Sparkles className="h-5 w-5 mt-0.5" />
                   <div>
-                    <h3 className="font-semibold text-sm">Create Quizzes</h3>
+                    <h3 className="font-semibold text-sm mb-1">Voice Recording</h3>
                     <p className="text-xs text-muted-foreground">
-                      Generate practice quizzes from your notes
+                      Record lectures and get instant transcriptions
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-lg bg-gradient-card border border-warning/20 hover:shadow-lg transition-all">
+                <div className="flex items-start gap-3">
+                  <FileUp className="h-5 w-5 mt-0.5" />
+                  <div>
+                    <h3 className="font-semibold text-sm mb-1">PDF Support</h3>
+                    <p className="text-xs text-muted-foreground">
+                      Upload PDFs and create notes about them
                     </p>
                   </div>
                 </div>
@@ -272,8 +409,7 @@ const Notes = () => {
           </Card>
         </div>
 
-        {/* Saved Notes */}
-        <Card className="mt-6">
+        <Card className="mt-6 animate-fade-up" style={{ animationDelay: '0.2s' }}>
           <CardHeader>
             <CardTitle>Your Saved Notes</CardTitle>
             <CardDescription>Access and manage your study notes</CardDescription>
@@ -281,14 +417,15 @@ const Notes = () => {
           <CardContent>
             <div className="space-y-4">
               {notes.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">
+                <p className="text-center text-muted-foreground py-12">
                   No notes yet. Create your first note above!
                 </p>
               ) : (
-                notes.map((note) => (
+                notes.map((note, index) => (
                   <div
                     key={note.id}
-                    className="p-4 rounded-lg border bg-card hover:shadow-md transition-shadow"
+                    className="p-4 rounded-lg border bg-gradient-card hover:shadow-xl transition-all animate-fade-up"
+                    style={{ animationDelay: `${index * 0.05}s` }}
                   >
                     <div className="flex items-start justify-between mb-2">
                       <div>
@@ -302,7 +439,7 @@ const Notes = () => {
                         variant="ghost"
                         onClick={() => handleDeleteNote(note.id)}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
                     </div>
                     <p className="text-sm text-muted-foreground mb-3 line-clamp-2">

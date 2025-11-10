@@ -7,6 +7,7 @@ const Navbar = () => {
   const navLinks = [
     { label: "Dashboard", href: "/dashboard" },
     { label: "Notes", href: "/notes" },
+    { label: "Equations", href: "/equations" },
     { label: "Study", href: "/study" },
     { label: "Quiz", href: "/quiz" },
     { label: "Schedule", href: "/schedule" },

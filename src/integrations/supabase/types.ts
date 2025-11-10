@@ -50,6 +50,42 @@ export type Database = {
         }
         Relationships: []
       }
+      equations: {
+        Row: {
+          created_at: string
+          description: string | null
+          equation_text: string
+          id: string
+          image_url: string | null
+          subject_id: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          equation_text: string
+          id?: string
+          image_url?: string | null
+          subject_id: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          equation_text?: string
+          id?: string
+          image_url?: string | null
+          subject_id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       flashcards: {
         Row: {
           back: string
@@ -180,6 +216,7 @@ export type Database = {
           id: string
           institute_name: string
           institute_type: string
+          profile_picture_url: string | null
           student_name: string
           updated_at: string | null
           user_id: string
@@ -191,6 +228,7 @@ export type Database = {
           id?: string
           institute_name: string
           institute_type: string
+          profile_picture_url?: string | null
           student_name: string
           updated_at?: string | null
           user_id: string
@@ -202,6 +240,7 @@ export type Database = {
           id?: string
           institute_name?: string
           institute_type?: string
+          profile_picture_url?: string | null
           student_name?: string
           updated_at?: string | null
           user_id?: string

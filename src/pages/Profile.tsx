@@ -8,11 +8,12 @@ import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Upload, Camera } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { TrendingUp, TrendingDown } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface Subject {
   id: string;
@@ -37,6 +38,8 @@ const Profile = () => {
   const [marks, setMarks] = useState<Mark[]>([]);
   const [newMarks, setNewMarks] = useState<{ [key: string]: { marks: number; total: number } }>({});
   const [progress, setProgress] = useState<{ [key: string]: number }>({});
+  const [uploading, setUploading] = useState(false);
+  const [profilePicUrl, setProfilePicUrl] = useState<string>("");
 
   useEffect(() => {
     checkUser();
@@ -74,6 +77,7 @@ const Profile = () => {
       setProfile(profileData);
       setSubjects(subjectsData || []);
       setMarks(marksData || []);
+      setProfilePicUrl(profileData?.profile_picture_url || "");
 
       // Calculate progress for each subject
       if (subjectsData && marksData) {
@@ -100,6 +104,54 @@ const Profile = () => {
         description: error.message,
         variant: "destructive",
       });
+    }
+  };
+
+  const handleUploadProfilePicture = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      setUploading(true);
+      
+      if (!event.target.files || event.target.files.length === 0) {
+        return;
+      }
+
+      const file = event.target.files[0];
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${user.id}/profile.${fileExt}`;
+
+      // Upload to storage
+      const { error: uploadError } = await supabase.storage
+        .from('profile-pictures')
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data } = supabase.storage
+        .from('profile-pictures')
+        .getPublicUrl(filePath);
+
+      // Update profile
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ profile_picture_url: data.publicUrl })
+        .eq('user_id', user.id);
+
+      if (updateError) throw updateError;
+
+      setProfilePicUrl(data.publicUrl);
+      toast({
+        title: "Success!",
+        description: "Profile picture updated successfully",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -174,15 +226,39 @@ const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-primary/10">
+    <div className="min-h-screen bg-gradient-mesh">
       <Navbar />
       <main className="container mx-auto px-4 py-8">
         <Card className="mb-8">
           <CardHeader>
-            <div className="flex justify-between items-center">
-              <div>
-                <CardTitle className="text-3xl">Student Profile</CardTitle>
-                <CardDescription>Manage your marks and track progress</CardDescription>
+            <div className="flex justify-between items-start">
+              <div className="flex items-center gap-6">
+                <div className="relative group">
+                  <Avatar className="h-24 w-24">
+                    <AvatarImage src={profilePicUrl} alt={profile.student_name} />
+                    <AvatarFallback className="text-2xl">
+                      {profile.student_name?.charAt(0) || "S"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <label 
+                    htmlFor="profile-upload" 
+                    className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                  >
+                    <Camera className="h-8 w-8 text-white" />
+                  </label>
+                  <input
+                    id="profile-upload"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleUploadProfilePicture}
+                    disabled={uploading}
+                  />
+                </div>
+                <div>
+                  <CardTitle className="text-3xl">{profile.student_name}</CardTitle>
+                  <CardDescription>@{profile.username}</CardDescription>
+                </div>
               </div>
               <Button onClick={handleLogout} variant="outline">
                 Logout
@@ -191,14 +267,6 @@ const Profile = () => {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm text-muted-foreground">Username</p>
-                <p className="font-medium">{profile.username}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Student Name</p>
-                <p className="font-medium">{profile.student_name}</p>
-              </div>
               <div>
                 <p className="text-sm text-muted-foreground">Class</p>
                 <p className="font-medium">{profile.class}</p>
