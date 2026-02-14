@@ -50,6 +50,45 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_challenges: {
+        Row: {
+          bonus_points: number
+          category: string
+          challenge_type: string
+          created_at: string
+          description: string
+          icon: string
+          id: string
+          requirement_type: string
+          requirement_value: number
+          title: string
+        }
+        Insert: {
+          bonus_points?: number
+          category?: string
+          challenge_type?: string
+          created_at?: string
+          description: string
+          icon?: string
+          id?: string
+          requirement_type: string
+          requirement_value?: number
+          title: string
+        }
+        Update: {
+          bonus_points?: number
+          category?: string
+          challenge_type?: string
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: string
+          requirement_type?: string
+          requirement_value?: number
+          title?: string
+        }
+        Relationships: []
+      }
       equations: {
         Row: {
           created_at: string
@@ -428,6 +467,71 @@ export type Database = {
             columns: ["achievement_id"]
             isOneToOne: false
             referencedRelation: "achievements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_bonus_points: {
+        Row: {
+          created_at: string
+          id: string
+          last_reset_date: string | null
+          total_points: number
+          updated_at: string
+          user_id: string
+          weekly_points: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_reset_date?: string | null
+          total_points?: number
+          updated_at?: string
+          user_id: string
+          weekly_points?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_reset_date?: string | null
+          total_points?: number
+          updated_at?: string
+          user_id?: string
+          weekly_points?: number
+        }
+        Relationships: []
+      }
+      user_challenge_completions: {
+        Row: {
+          bonus_points_earned: number
+          challenge_date: string
+          challenge_id: string
+          completed_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          bonus_points_earned?: number
+          challenge_date?: string
+          challenge_id: string
+          completed_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          bonus_points_earned?: number
+          challenge_date?: string
+          challenge_id?: string
+          completed_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_challenge_completions_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "daily_challenges"
             referencedColumns: ["id"]
           },
         ]

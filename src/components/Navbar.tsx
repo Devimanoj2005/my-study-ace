@@ -12,6 +12,7 @@ const Navbar = () => {
     { label: "Quiz", href: "/quiz" },
     { label: "Schedule", href: "/schedule" },
     { label: "Progress", href: "/progress" },
+    { label: "Challenges", href: "/challenges" },
   ];
 
   return (
