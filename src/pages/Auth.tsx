@@ -149,7 +149,17 @@ const Auth = () => {
         description: "Logged in successfully. Redirecting...",
       });
 
-      setTimeout(() => navigate("/dashboard"), 1000);
+      // Check if profile exists
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("user_id", session.user.id)
+          .maybeSingle();
+
+        setTimeout(() => navigate(profile ? "/dashboard" : "/profile-setup"), 1000);
+      }
     } catch (error: any) {
       toast({
         title: "Error",

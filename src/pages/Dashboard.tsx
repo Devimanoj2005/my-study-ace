@@ -38,6 +38,19 @@ const Dashboard = () => {
       navigate("/auth");
       return;
     }
+
+    // Check if user has a profile, redirect to setup if not
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("user_id", session.user.id)
+      .maybeSingle();
+
+    if (!profile) {
+      navigate("/profile-setup");
+      return;
+    }
+
     setUser(session.user);
     fetchData(session.user.id);
   };
