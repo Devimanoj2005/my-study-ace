@@ -1,73 +1,113 @@
-# Welcome to your Lovable project
+## Smart Study Partner
 
-## Project info
+An intelligent learning app that acts like a personal AI tutor for students.
+Smart Study Partner helps learners study smarter by combining AI-generated quizzes, confidence-based learning, and spaced repetition techniques.
 
-**URL**: https://lovable.dev/projects/89edf9b6-6b93-4534-b206-09749162c640
+The app personalizes study sessions, tracks progress, and provides feedback that helps students remember topics longer — with less stress.
 
-## How can I edit this code?
+📖 Concept & Working
 
-There are several ways of editing your application.
+After each study session, the app automatically creates short quizzes based on what the student studied.
 
-**Use Lovable**
+Students:
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/89edf9b6-6b93-4534-b206-09749162c640) and start prompting.
+Answer the generated questions
 
-Changes made via Lovable will be committed automatically to this repo.
+Rate their confidence level (Low / Medium / High)
 
-**Use your preferred IDE**
+Based on this feedback, the app uses adaptive scheduling to determine when and how the topic should be revised again.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+The system:
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+Identifies weak areas
 
-Follow these steps:
+Provides quick memory tips
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+Generates mini revision plans
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+Over time, it builds a personal learning profile that understands each student’s strengths and struggles — making learning efficient, personalized, and stress-free.
 
-# Step 3: Install the necessary dependencies.
-npm i
+✨ Key Features
+🧩 AI-Generated Quizzes
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+Automatically generates short revision quizzes after each study session.
 
-**Edit a file directly in GitHub**
+⚖️ Confidence-Based Learning
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Adjusts difficulty and revision intervals based on student confidence levels.
 
-**Use GitHub Codespaces**
+⏰ Smart Revision Scheduler
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Implements spaced repetition to remind students just before they forget a topic.
 
-## What technologies are used for this project?
+📊 Progress Tracking
 
-This project is built with:
+Visualizes mastery levels and highlights weak areas for improvement.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+🧘 Focus Mode & Study Timer
 
-## How can I deploy this project?
+Encourages distraction-free, focused study sessions.
 
-Simply open [Lovable](https://lovable.dev/projects/89edf9b6-6b93-4534-b206-09749162c640) and click on Share -> Publish.
+💡 Memory Tips & Insights
 
-## Can I connect a custom domain to my Lovable project?
+Provides personalized mnemonics and study recommendations.
 
-Yes, you can!
+🛠️ Proposed Tech Stack
+🎨 Frontend
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+React (Web)
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+OR Flutter (Mobile)
+
+⚙️ Backend
+
+Node.js with Express
+
+OR Python with FastAPI
+
+🗄️ Database
+
+PostgreSQL
+
+OR Firebase (Real-time storage)
+
+🤖 AI / NLP Integration
+
+Quiz generation
+
+Topic analysis
+
+Adaptive learning logic
+
+🔐 Authentication
+
+Firebase Authentication
+
+OR JWT-based secure login
+
+📈 Analytics & Visualization
+
+Chart.js
+
+OR Recharts
+
+🔄 How It Works (Simplified Flow)
+
+Student starts a study session and selects a topic.
+
+App tracks duration and highlights key points.
+
+After the session ends, the app generates a short quiz (3–5 questions).
+
+Student answers the questions and rates confidence.
+
+App stores results and applies a spaced-repetition algorithm.
+
+Dashboard displays:
+
+Topic mastery
+
+Weak areas
+
+Daily revision reminders
+
