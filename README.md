@@ -66,18 +66,13 @@ Provides personalized mnemonics and study recommendations.
 ### ⚙️ Backend
 
 * Node.js with Express
-* OR Python with FastAPI
+
 
 ### 🗄️ Database
 
-* PostgreSQL
-* OR Firebase (Real-time storage)
+*  Firebase (Real-time storage)
 
-### 🤖 AI / NLP Integration
 
-* Quiz generation
-* Topic analysis
-* Adaptive learning logic
 
 ### 🔐 Authentication
 
