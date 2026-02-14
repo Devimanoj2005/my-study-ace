@@ -57,11 +57,11 @@ const Profile = () => {
 
   const fetchProfileData = async (userId: string) => {
     try {
-      const { data: profileData } = await supabase
+      const { data: profileData, error: profileError } = await supabase
         .from("profiles")
         .select("*")
         .eq("user_id", userId)
-        .single();
+        .maybeSingle();
 
       const { data: subjectsData } = await supabase
         .from("subjects")
@@ -74,10 +74,15 @@ const Profile = () => {
         .select("*")
         .eq("user_id", userId);
 
-      setProfile(profileData);
+      if (!profileData) {
+        // No profile yet — set empty defaults so page renders
+        setProfile({ student_name: user?.email?.split("@")[0] || "Student", username: "user", class: "N/A", institute_name: "N/A" });
+      } else {
+        setProfile(profileData);
+        setProfilePicUrl(profileData.profile_picture_url || "");
+      }
       setSubjects(subjectsData || []);
       setMarks(marksData || []);
-      setProfilePicUrl(profileData?.profile_picture_url || "");
 
       // Calculate progress for each subject
       if (subjectsData && marksData) {
@@ -99,6 +104,8 @@ const Profile = () => {
         setProgress(progressData);
       }
     } catch (error: any) {
+      // Still render page even on error
+      setProfile({ student_name: "Student", username: "user", class: "N/A", institute_name: "N/A" });
       toast({
         title: "Error",
         description: error.message,
