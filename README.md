@@ -1,113 +1,118 @@
-## Smart Study Partner
+# 📚 Smart Study Partner
 
 An intelligent learning app that acts like a personal AI tutor for students.
-Smart Study Partner helps learners study smarter by combining AI-generated quizzes, confidence-based learning, and spaced repetition techniques.
+Smart Study Partner helps learners study smarter by combining **AI-generated quizzes**, **confidence-based learning**, and **spaced repetition techniques**.
 
 The app personalizes study sessions, tracks progress, and provides feedback that helps students remember topics longer — with less stress.
 
-📖 Concept & Working
+---
+
+## 📖 Concept & Working
 
 After each study session, the app automatically creates short quizzes based on what the student studied.
 
 Students:
 
-Answer the generated questions
+* Answer the generated questions
+* Rate their confidence level (Low / Medium / High)
 
-Rate their confidence level (Low / Medium / High)
-
-Based on this feedback, the app uses adaptive scheduling to determine when and how the topic should be revised again.
+Based on this feedback, the app uses **adaptive scheduling** to determine when and how the topic should be revised again.
 
 The system:
 
-Identifies weak areas
+* Identifies weak areas
+* Provides quick memory tips
+* Generates mini revision plans
 
-Provides quick memory tips
+Over time, it builds a **personal learning profile** that understands each student’s strengths and struggles — making learning efficient, personalized, and stress-free.
 
-Generates mini revision plans
+---
 
-Over time, it builds a personal learning profile that understands each student’s strengths and struggles — making learning efficient, personalized, and stress-free.
+## ✨ Key Features
 
-✨ Key Features
-🧩 AI-Generated Quizzes
+### 🧩 AI-Generated Quizzes
 
 Automatically generates short revision quizzes after each study session.
 
-⚖️ Confidence-Based Learning
+### ⚖️ Confidence-Based Learning
 
 Adjusts difficulty and revision intervals based on student confidence levels.
 
-⏰ Smart Revision Scheduler
+### ⏰ Smart Revision Scheduler
 
 Implements spaced repetition to remind students just before they forget a topic.
 
-📊 Progress Tracking
+### 📊 Progress Tracking
 
 Visualizes mastery levels and highlights weak areas for improvement.
 
-🧘 Focus Mode & Study Timer
+### 🧘 Focus Mode & Study Timer
 
 Encourages distraction-free, focused study sessions.
 
-💡 Memory Tips & Insights
+### 💡 Memory Tips & Insights
 
 Provides personalized mnemonics and study recommendations.
 
-🛠️ Proposed Tech Stack
-🎨 Frontend
+---
 
-React (Web)
+## 🛠️ Proposed Tech Stack
 
-OR Flutter (Mobile)
+### 🎨 Frontend
 
-⚙️ Backend
+* React (Web)
+* OR Flutter (Mobile)
 
-Node.js with Express
+### ⚙️ Backend
 
-OR Python with FastAPI
+* Node.js with Express
+* OR Python with FastAPI
 
-🗄️ Database
+### 🗄️ Database
 
-PostgreSQL
+* PostgreSQL
+* OR Firebase (Real-time storage)
 
-OR Firebase (Real-time storage)
+### 🤖 AI / NLP Integration
 
-🤖 AI / NLP Integration
+* Quiz generation
+* Topic analysis
+* Adaptive learning logic
 
-Quiz generation
+### 🔐 Authentication
 
-Topic analysis
+* Firebase Authentication
+* OR JWT-based secure login
 
-Adaptive learning logic
+### 📈 Analytics & Visualization
 
-🔐 Authentication
+* Chart.js
+* OR Recharts
 
-Firebase Authentication
+---
 
-OR JWT-based secure login
+## 🔄 How It Works (Simplified Flow)
 
-📈 Analytics & Visualization
+1. Student starts a study session and selects a topic.
+2. App tracks duration and highlights key points.
+3. After the session ends, the app generates a short quiz (3–5 questions).
+4. Student answers the questions and rates confidence.
+5. App stores results and applies a spaced-repetition algorithm.
+6. Dashboard displays:
 
-Chart.js
+   * Topic mastery
+   * Weak areas
+   * Daily revision reminders
 
-OR Recharts
+---
 
-🔄 How It Works (Simplified Flow)
+## 🎯 Goal & Vision
 
-Student starts a study session and selects a topic.
+To make self-study feel like learning with a personal AI companion — one that understands your strengths, tracks your confidence, and helps you remember everything smarter, not harder.
 
-App tracks duration and highlights key points.
+Smart Study Partner promotes:
 
-After the session ends, the app generates a short quiz (3–5 questions).
-
-Student answers the questions and rates confidence.
-
-App stores results and applies a spaced-repetition algorithm.
-
-Dashboard displays:
-
-Topic mastery
-
-Weak areas
-
-Daily revision reminders
-
+* Consistent learning habits
+* Improved retention
+* Reduced exam stress
+* Adaptive and supportive learning technology
